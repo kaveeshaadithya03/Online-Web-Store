@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management | Online Web Store</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <!-- Navigation -->
+    <div class="navigation">
+        <ul>
+            <li>
+
+                        <span class="icon">
+                            <img src="/assets/imgs/logo.png" width="50" height="60" alt="Logo">
+                        </span>
+                    <span class="title">Online Web Store</span>
+            </li>
+            <li>
+                <a href="/AdminDashboard.html">
+                        <span class="icon">
+                            <ion-icon name="home-outline"></ion-icon>
+                        </span>
+                    <span class="title">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminUser.html">
+                        <span class="icon">
+                            <ion-icon name="people-outline"></ion-icon>
+                        </span>
+                    <span class="title">Customers</span>
+                </a>
+            </li>
+            <li>
+                <a href="/Admin.html">
+                        <span class="icon">
+                            <ion-icon name="person-outline"></ion-icon>
+                        </span>
+                    <span class="title">Admins</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminEmployee.html">
+                        <span class="icon">
+                            <ion-icon name="briefcase-outline"></ion-icon>
+                        </span>
+                    <span class="title">Employees</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminProduct.html">
+                        <span class="icon">
+                            <ion-icon name="bag-outline"></ion-icon>
+                        </span>
+                    <span class="title">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="login.html">
+                        <span class="icon">
+                            <ion-icon name="log-out-outline"></ion-icon>
+                        </span>
+                    <span class="title">Sign Out</span>
+                </a>
+            </li>
+            <li>
+                <button id="theme-toggle" class="theme-toggle">
+                        <span class="icon">
+                            <ion-icon name="moon-outline"></ion-icon>
+                        </span>
+                    <span class="title">Toggle Theme</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="topbar">
+            <div class="toggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </div>
+            <div class="search">
+                <label>
+                    <input type="text" placeholder="Search here">
+                    <ion-icon name="search-outline"></ion-icon>
+                </label>
+            </div>
+            <div class="user">
+                <img src="/assets/imgs/customer01.jpg" alt="User">
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h2>Add/Edit Employee</h2>
+            <form id="employeeForm">
+                <input type="hidden" id="employeeId" value="">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+                <label for="customService">Customer Service:</label>
+                <input type="checkbox" id="customService" name="roles">
+                <label for="financeExecution">Finance Executive:</label>
+                <input type="checkbox" id="financeExecution" name="roles">
+                <label for="marketingExecutive">Marketing Executive:</label>
+                <input type="checkbox" id="marketingExecutive" name="roles">
+                <button type="submit">Save</button>
+                <button type="button" id="cancelEdit">Cancel</button>
+            </form>
+            <div id="error-message"></div>
+        </div>
+        <div class="section">
+            <h2>Employees</h2>
+            <table id="employeesTable">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navigation hover effect
+    let list = document.querySelectorAll('.navigation li');
+    function activeLink() {
+        list.forEach(item => item.classList.remove('hovered'));
+        this.classList.add('hovered');
+    }
+    list.forEach(item => item.addEventListener('mouseover', activeLink));
+
+    // Menu toggle
+    let toggle = document.querySelector('.toggle');
+    let navigation = document.querySelector('.navigation');
+    let main = document.querySelector('.main');
+    toggle.onclick = function () {
+        navigation.classList.toggle('active');
+        main.classList.toggle('active');
+    };
+
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+    });
+
+    const apiUrl = '/api/employees';
+
+    // Display error messages
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 5000);
+    }
+
+    // Load employees and populate table
+    function loadEmployees() {
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch employees');
+                return response.json();
+            })
+            .then(employees => {
+                const tbody = document.getElementById('employeesTable').querySelector('tbody');
+                tbody.innerHTML = '';
+                employees.forEach(employee => {
+                    const roles = employee.roles.join(', ');
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${employee.name}</td>
+                            <td>${employee.email}</td>
+                            <td>${roles || 'None'}</td>
+                            <td>
+                                <button onclick="editEmployee('${employee.id}')">Edit</button>
+                                <button onclick="deleteEmployee('${employee.id}')">Delete</button>
+                            </td>
+                        `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading employees:', error);
+                showError('Failed to load employees. Please try again.');
+            });
+    }
+
+    // Edit employee
+    function editEmployee(id) {
+        fetch(`${apiUrl}/${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch employee');
+                return response.json();
+            })
+            .then(employee => {
+                document.getElementById('employeeId').value = employee.id;
+                document.getElementById('name').value = employee.name;
+                document.getElementById('email').value = employee.email;
+                document.getElementById('password').value = '';
+                document.getElementById('customService').checked = employee.roles.includes('CUSTOMER_SERVICE');
+                document.getElementById('financeExecution').checked = employee.roles.includes('FINANCE_EXECUTION');
+                document.getElementById('marketingExecutive').checked = employee.roles.includes('MARKETING_EXECUTIVE');
+                document.getElementById('cancelEdit').style.display = 'inline';
+            })
+            .catch(error => {
+                console.error('Error fetching employee:', error);
+                showError('Failed to load employee. Please try again.');
+            });
+    }
+
+    // Delete employee
+    function deleteEmployee(id) {
+        if (confirm('Are you sure you want to delete this employee?')) {
+            fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to delete employee');
+                    loadEmployees();
+                })
+                .catch(error => {
+                    console.error('Error deleting employee:', error);
+                    showError('Failed to delete employee. Please try again.');
+                });
+        }
+    }
+
+    // Form submission for creating/updating employees
+    document.getElementById('employeeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('employeeId').value;
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${apiUrl}/${id}` : apiUrl;
+        const roles = new Set();
+        if (document.getElementById('customService').checked) roles.add('CUSTOMER_SERVICE');
+        if (document.getElementById('financeExecution').checked) roles.add('FINANCE_EXECUTION');
+        if (document.getElementById('marketingExecutive').checked) roles.add('MARKETING_EXECUTIVE');
+        const data = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            roles: Array.from(roles)
+        };
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text || 'Failed to save employee') });
+                }
+                return response.json();
+            })
+            .then(() => {
+                resetForm();
+                loadEmployees();
+            })
+            .catch(error => {
+                console.error('Error saving employee:', error);
+                showError(error.message);
+            });
+    });
+
+    // Reset form
+    function resetForm() {
+        document.getElementById('employeeForm').reset();
+        document.getElementById('employeeId').value = '';
+        document.getElementById('cancelEdit').style.display = 'none';
+    }
+
+    // Cancel edit
+    document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+    // Initial load
+    loadEmployees();
+    resetForm();
+</script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
+```

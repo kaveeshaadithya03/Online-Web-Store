@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Online Web Store</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="navigation">
+        <ul>
+            <li>
+                <span class="icon">
+                    <img src="/assets/imgs/logo.png" width="80" height="100" alt="Logo">
+                    <h4><span class="title">POLA.LK<br>Online Web Store</span></h4>
+                </span>
+            </li>
+            <li>
+                <a href="/AdminDashboard.html">
+                    <span class="icon">
+                        <ion-icon name="home-outline"></ion-icon>
+                    </span>
+                    <span class="title">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminUser.html">
+                    <span class="icon">
+                        <ion-icon name="people-outline"></ion-icon>
+                    </span>
+                    <span class="title">Customers</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminDashboard.html">
+                    <span class="icon">
+                        <ion-icon name="person-outline"></ion-icon>
+                    </span>
+                    <span class="title">Admins</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminEmployee.html">
+                    <span class="icon">
+                        <ion-icon name="briefcase-outline"></ion-icon>
+                    </span>
+                    <span class="title">Employees</span>
+                </a>
+            </li>
+            <li>
+                <a href="/AdminProduct.html">
+                    <span class="icon">
+                        <ion-icon name="bag-outline"></ion-icon>
+                    </span>
+                    <span class="title">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="login.html">
+                    <span class="icon">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                    </span>
+                    <span class="title">Sign Out</span>
+                </a>
+            </li>
+            <li>
+                <button id="theme-toggle" class="theme-toggle">
+                    <span class="icon">
+                        <ion-icon name="moon-outline"></ion-icon>
+                    </span>
+                    <span class="title">Toggle Theme</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="main">
+        <div class="topbar">
+            <div class="toggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </div>
+            <div class="search">
+                <label>
+                    <input type="text" placeholder="Search here">
+                    <ion-icon name="search-outline"></ion-icon>
+                </label>
+            </div>
+            <div class="user">
+                <img src="/assets/imgs/customer01.jpg" alt="User">
+            </div>
+        </div>
+        <div class="cardBox">
+            <div class="card">
+                <div>
+                    <div class="numbers" id="buyer-count">0</div>
+                    <div class="cardName">Buyers</div>
+                </div>
+                <div class="iconBx">
+                    <ion-icon name="eye-outline"></ion-icon>
+                </div>
+            </div>
+            <div class="card">
+                <div>
+                    <div class="numbers" id="seller-count">0</div>
+                    <div class="cardName">Sellers</div>
+                </div>
+                <div class="iconBx">
+                    <ion-icon name="storefront-outline"></ion-icon> <!-- Icon for sellers -->
+                </div>
+            </div>
+            <div class="card">
+                <div>
+                    <div class="numbers" id="sales-count">0</div>
+                    <div class="cardName">Sales</div>
+                </div>
+                <div class="iconBx">
+                    <ion-icon name="cart-outline"></ion-icon>
+                </div>
+            </div>
+            <div class="card">
+                <div>
+                    <div class="numbers" id="earnings-count">0</div>
+                    <div class="cardName">Earnings</div>
+                </div>
+                <div class="iconBx">
+                    <ion-icon name="cash-outline"></ion-icon>
+                </div>
+            </div>
+        </div>
+        <div class="details">
+            <div class="recentOrders">
+                <div class="cardHeader">
+                    <h2>Recent Orders</h2>
+                    <a href="#" class="btn">View All</a>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Total Price</th>
+                    </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="recentCustomers">
+                <div class="cardHeader">
+                    <h2>Recent Customers</h2>
+                </div>
+                <table id="customers-table">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let list = document.querySelectorAll('.navigation li');
+    function activeLink() { list.forEach(item => item.classList.remove('hovered')); this.classList.add('hovered'); }
+    list.forEach(item => item.addEventListener('mouseover', activeLink));
+    let toggle = document.querySelector('.toggle');
+    let navigation = document.querySelector('.navigation');
+    let main = document.querySelector('.main');
+    toggle.onclick = function () { navigation.classList.toggle('active'); main.classList.toggle('active'); };
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => { document.body.classList.toggle('dark-theme'); });
+    function loadOrders() {
+        fetch('/api/orders')
+            .then(response => response.json())
+            .then(orders => {
+                const tbody = document.getElementById('orders-table-body');
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>${order.orderID || 'N/A'}</td>
+                        <td>$${order.price ? order.price.toFixed(2) : '0.00'}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('sales-count').textContent = orders.length;
+                document.getElementById('earnings-count').textContent = `$${orders.reduce((sum, order) => sum + (order.price || 0), 0).toFixed(2)}`;
+            })
+            .catch(error => console.error('Error fetching orders:', error));
+    }
+    function loadCustomers() {
+        fetch('/api/users')
+            .then(response => response.json())
+            .then(users => {
+                const customers = users.filter(user => user.role === "customer");
+                const tbody = document.getElementById('customers-table').querySelector('tbody');
+                tbody.innerHTML = customers.slice(0, 8).map((customer, index) => `
+                    <tr>
+                        <td width="60px"><div class="imgBx"><img src="/assets/imgs/customer0${index % 2 + 1}.jpg" alt=""></div></td>
+                        <td><h4>${customer.name} <br> <span>${customer.email}</span></h4></td>
+                    </tr>
+                `).join('');
+                document.getElementById('buyer-count').textContent = customers.length;
+            })
+            .catch(error => console.error('Error fetching customers:', error));
+    }
+    function loadSellers() {
+        fetch('/api/users')
+            .then(response => response.json())
+            .then(users => {
+                const sellers = users.filter(user => user.role === "seller");
+                document.getElementById('seller-count').textContent = sellers.length;
+            })
+            .catch(error => console.error('Error fetching sellers:', error));
+    }
+    loadOrders();
+    loadCustomers();
+    loadSellers();
+</script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
