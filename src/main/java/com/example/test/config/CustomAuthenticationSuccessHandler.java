@@ -18,20 +18,19 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        String role = authorities.iterator().next().getAuthority(); // Get first role
-
+        String role = authorities.iterator().next().getAuthority().replace("ROLE_", "");
         String redirectUrl = getRedirectUrl(role);
         response.sendRedirect(redirectUrl);
     }
 
     private String getRedirectUrl(String role) {
         return switch (role) {
-            case "ROLE_admin" -> "/AdminDashboard.html";
-            case "ROLE_customer" -> "/customer.html";
-            case "ROLE_seller" -> "/seller.html";
-            case "ROLE_CUSTOMER_SERVICE" -> "/customer_service.html";
-            case "ROLE_FINANCE_EXECUTION" -> "/finance_execution.html";
-            case "ROLE_MARKETING_EXECUTIVE" -> "/marketing_executive.html";
+            case "admin" -> "/AdminDashboard.html";
+            case "customer" -> "/customer.html";
+            case "seller" -> "/sellerProperties.html";
+            case "CUSTOMER_SERVICE" -> "/customer_service.html";
+            case "FINANCE_EXECUTION" -> "/finance_execution.html";
+            case "MARKETING_EXECUTIVE" -> "/marketing_executive.html";
             default -> "/login.html?error=invalid_role";
         };
     }

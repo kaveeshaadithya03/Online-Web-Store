@@ -17,6 +17,9 @@ public class Product {
     @NotBlank(message = "Product Name is required")
     private String productName;
 
+    @NotBlank(message = "Description is required")
+    private String description;
+
     @NotNull(message = "Product Price is required")
     @Positive(message = "Product Price must be positive")
     private Double productPrice;
@@ -25,13 +28,21 @@ public class Product {
     @Positive(message = "Product Count must be positive")
     private Integer productCount;
 
+    private String images;
+
+    @NotBlank(message = "Seller ID is required")
+    private String sellerId;
+
     public Product() {}
 
-    public Product(String productID, String productName, Double productPrice, Integer productCount) {
+    public Product(String productID, String productName, String description, Double productPrice, Integer productCount, String images, String sellerId) {
         this.productID = productID;
         this.productName = productName;
+        this.description = description;
         this.productPrice = productPrice;
         this.productCount = productCount;
+        this.images = images;
+        this.sellerId = sellerId;
     }
 
     public String getId() { return id; }
@@ -40,8 +51,14 @@ public class Product {
     public void setProductID(String productID) { this.productID = productID; }
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public Double getProductPrice() { return productPrice; }
     public void setProductPrice(Double productPrice) { this.productPrice = productPrice; }
     public Integer getProductCount() { return productCount; }
     public void setProductCount(Integer productCount) { this.productCount = productCount; }
+    public String getImages() { return images; }
+    public void setImages(String images) { this.images = images; }
+    public String getSellerId() { return sellerId; }
+    public void setSellerId(String sellerId) { this.sellerId = sellerId; }
 }
