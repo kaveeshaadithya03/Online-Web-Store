@@ -75,7 +75,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="/assets/imgs/logo.png" alt="POLA.LK Logo" width="50">
             POLA.LK
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +138,6 @@
     // Logout functionality
     document.getElementById('logout-link').addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = '/logout';
     });
 
     // Load and render cart
@@ -150,17 +148,11 @@
         const successMessage = document.getElementById('success-message');
         cartItemsBody.innerHTML = '';
 
-        fetch('/api/cart', {
-            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
             }
         })
             .then(response => {
-                if (response.status === 401) {
-                    throw new Error('401 Unauthorized');
                 }
-                if (!response.ok) throw new Error(`Failed to fetch cart: ${response.status}`);
                 return response.json();
             })
             .then(cartItems => {
@@ -176,7 +168,6 @@
                     total += itemTotal;
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><img src='${item.images}'alt="${item.productName}"></td>
                         <td><a href="/productDetails.html?id=${item.productId}">${item.productName}</a></td>
                         <td>${item.productPrice.toFixed(2)} LKR</td>
                         <td><input type="number" class="form-control quantity-input" data-id="${item.id}" value="${item.quantity}" min="1"></td>
@@ -200,17 +191,13 @@
                             return;
                         }
 
-                        fetch(`/api/cart/update/${id}`, {
                             method: 'PUT',
-                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ productId: cartItems.find(item => item.id === id).productId, quantity: newQuantity })
                         })
                             .then(response => {
                                 if (!response.ok) {
-                                    throw new Error(`Failed to update cart: ${response.status}`);
                                 }
                                 return response.json();
                             })
@@ -239,16 +226,12 @@
                 document.querySelectorAll('.remove-item').forEach(button => {
                     button.addEventListener('click', (e) => {
                         const id = e.target.dataset.id;
-                        fetch(`/api/cart/${id}`, {
                             method: 'DELETE',
-                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json'
                             }
                         })
                             .then(response => {
                                 if (!response.ok) {
-                                    throw new Error(`Failed to remove item: ${response.status}`);
                                 }
                                 successMessage.textContent = 'Item removed from cart!';
                                 successMessage.style.display = 'block';
@@ -284,16 +267,12 @@
 
     // Clear cart
     document.getElementById('clear-cart').addEventListener('click', () => {
-        fetch('/api/cart/clear', {
             method: 'DELETE',
-            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
             }
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Failed to clear cart: ${response.status}`);
                 }
                 document.getElementById('success-message').textContent = 'Cart cleared!';
                 document.getElementById('success-message').style.display = 'block';

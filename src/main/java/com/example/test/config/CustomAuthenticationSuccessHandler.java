@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         return switch (role) {
             case "ROLE_admin" -> "/AdminDashboard.html";
             case "ROLE_customer" -> "/customer.html";
-            case "ROLE_seller" -> "/sellerProperties.html";
+            case "ROLE_seller" -> "/seller.html";
             case "ROLE_CUSTOMER_SERVICE" -> "/customer_service.html";
             case "ROLE_FINANCE_EXECUTION" -> "/finance_execution.html";
             case "ROLE_MARKETING_EXECUTIVE" -> "/marketing_executive.html";

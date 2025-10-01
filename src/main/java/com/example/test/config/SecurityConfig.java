@@ -29,8 +29,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login.html")
-                        .loginProcessingUrl("/login")
+                        .loginPage("/login")
                         .successHandler(customAuthenticationSuccessHandler)
                         .permitAll()
                 )
@@ -39,7 +38,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login.html")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.disable()); // Disable CSRF for simplicity (enable in production with tokens)
+                .csrf(csrf -> csrf.disable()); // Disable CSRF for simplicity (enable in production)
         return http.build();
     }
 
