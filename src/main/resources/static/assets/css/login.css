@@ -781,7 +781,17 @@ orange circle
     50%  { transform: rotate(0deg); }
     100% { transform: rotate(-180deg); }
 }
-
+.logoimage{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20vw;
+    height: 20vw;
+    border-radius: 50%;
+    overflow: hidden;
+    background-image: url("/static/assets/imgs/logo.png");
+}
 .name{
     position: absolute;
     top: 50%;

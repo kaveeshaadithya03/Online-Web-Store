@@ -8,8 +8,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -27,6 +29,23 @@ public class EmployeeController {
         return employeeRepository.findAll();
     }
 
+    @GetMapping("/admins")
+    public List<Employee> getAdmins() {
+        return employeeRepository.findByRolesContaining(Employee.ROLE_ADMIN);
+    }
+
+    @GetMapping("/non-admins")
+    public List<Employee> getNonAdmins() {
+        List<String> nonAdminRoles = Arrays.asList(
+                Employee.ROLE_CUSTOMER_SERVICE,
+                Employee.ROLE_FINANCE_EXECUTION,
+                Employee.ROLE_MARKETING_EXECUTIVE
+        );
+        return employeeRepository.findAll().stream()
+                .filter(employee -> employee.getRoles().stream().anyMatch(nonAdminRoles::contains))
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable String id) {
         Optional<Employee> employee = employeeRepository.findById(id);
@@ -34,9 +53,9 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
-        if (employeeRepository.findByEmail(employee.getEmail()) != null) {
-            return ResponseEntity.badRequest().body(null); // Return 400 with null body for duplicate email
+    public ResponseEntity<?> createEmployee(@Valid @RequestBody Employee employee) {
+        if (employeeRepository.existsByEmail(employee.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         Employee savedEmployee = employeeRepository.save(employee);
@@ -49,9 +68,8 @@ public class EmployeeController {
         if (!existingEmployee.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        Employee existingEmployeeWithEmail = employeeRepository.findByEmail(updatedEmployee.getEmail()); // Fixed typo here
-        if (existingEmployeeWithEmail != null && !existingEmployeeWithEmail.getId().equals(id)) {
-            return ResponseEntity.badRequest().body("Email already exists"); // Return 400 with error message
+        if (employeeRepository.existsByEmail(updatedEmployee.getEmail()) && !updatedEmployee.getEmail().equals(existingEmployee.get().getEmail())) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
         updatedEmployee.setId(id);
         if (updatedEmployee.getPassword() != null && !updatedEmployee.getPassword().isEmpty()) {

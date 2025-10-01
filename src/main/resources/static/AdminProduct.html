@@ -61,7 +61,7 @@
                 </a>
             </li>
             <li>
-                <a href="login.html">
+                <a href="/logout">
                         <span class="icon">
                             <ion-icon name="log-out-outline"></ion-icon>
                         </span>
@@ -137,11 +137,13 @@
         document.body.classList.toggle('dark-theme');
     });
 
-    const apiUrl = '/api/products';
+    const apiUrl = '/api/products/public';
 
     // Load products and populate table
     function loadProducts() {
-        fetch(apiUrl)
+        fetch(apiUrl, {
+            credentials: 'include'
+        })
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch products');
                 return response.json();

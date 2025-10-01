@@ -24,6 +24,7 @@ public class Employee {
 
     private Set<String> roles = new HashSet<>();
 
+    public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_CUSTOMER_SERVICE = "CUSTOMER_SERVICE";
     public static final String ROLE_FINANCE_EXECUTION = "FINANCE_EXECUTION";
     public static final String ROLE_MARKETING_EXECUTIVE = "MARKETING_EXECUTIVE";
@@ -54,7 +55,13 @@ public class Employee {
             }
         }
     }
+
     private boolean isValidRole(String role) {
-        return role != null && (role.equals(ROLE_CUSTOMER_SERVICE) || role.equals(ROLE_FINANCE_EXECUTION) || role.equals(ROLE_MARKETING_EXECUTIVE));
+        return role != null && (
+                role.equals(ROLE_ADMIN) ||
+                        role.equals(ROLE_CUSTOMER_SERVICE) ||
+                        role.equals(ROLE_FINANCE_EXECUTION) ||
+                        role.equals(ROLE_MARKETING_EXECUTIVE)
+        );
     }
 }
