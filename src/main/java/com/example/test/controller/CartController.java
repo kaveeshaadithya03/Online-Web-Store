@@ -24,6 +24,8 @@ public class CartController {
 
     @PostMapping("/add")
     public ResponseEntity<CartItem> addToCart(@RequestBody CartItem cartItem) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.equals("anonymousUser")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -38,10 +40,12 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+        cartItem.setUserId(email); // Use email as userId
         cartItem.setProductName(product.getProductName());
         cartItem.setProductPrice(product.getProductPrice());
         cartItem.setImage(product.getImages());
 
+        Optional<CartItem> existingItem = cartItemRepository.findByUserIdAndProductId(email, cartItem.getProductId());
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
             item.setQuantity(item.getQuantity() + cartItem.getQuantity());
@@ -54,16 +58,22 @@ public class CartController {
 
     @GetMapping
     public ResponseEntity<List<CartItem>> getCart() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.equals("anonymousUser")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        List<CartItem> cartItems = cartItemRepository.findByUserId(email);
         return ResponseEntity.ok(cartItems);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<CartItem> updateCartItem(@PathVariable String id, @RequestBody CartItem updatedItem) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.equals("anonymousUser")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByIdAndUserId(id, email);
         if (!cartItemOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -87,9 +97,12 @@ public class CartController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeCartItem(@PathVariable String id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.equals("anonymousUser")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByIdAndUserId(id, email);
         if (cartItemOptional.isPresent()) {
             cartItemRepository.delete(cartItemOptional.get());
             return ResponseEntity.ok().build();
@@ -99,8 +112,11 @@ public class CartController {
 
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearCart() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.equals("anonymousUser")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        List<CartItem> cartItems = cartItemRepository.findByUserId(email);
         cartItemRepository.deleteAll(cartItems);
         return ResponseEntity.ok().build();
     }

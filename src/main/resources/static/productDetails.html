@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details | POLA.LK</title>
-    <link rel="icon" type="image/png" href="/css/images/favicon.png">
+    <link rel="icon" type="image/png" href="/assets/imgs/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -150,9 +150,6 @@
                     <a class="nav-link" href="/cart.html">Cart</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/seller/orders">Orders</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/logout" id="logout-link">Sign Out</a>
                 </li>
             </ul>
@@ -232,6 +229,7 @@
     // Logout functionality
     document.getElementById('logout-link').addEventListener('click', (e) => {
         e.preventDefault();
+        window.location.href = '/logout';
     });
 
     // Fetch product details with retry
@@ -257,6 +255,8 @@
         productDetails.style.display = 'none';
         notFound.style.display = 'none';
 
+        fetch(`/api/products/public/${productId}?t=${Date.now()}`, {
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -295,6 +295,9 @@
                     document.getElementById('no-image').style.display = 'block';
                 }
 
+                // Fetch seller info
+                fetch(`/api/users/${product.sellerId}`, {
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 })
                     .then(response => {
@@ -336,8 +339,11 @@
                         return;
                     }
 
+                    fetch('/api/cart/add', {
                         method: 'POST',
+                        credentials: 'include',
                         headers: {
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             productId: product.id,
@@ -365,9 +371,12 @@
                             console.error('Add to cart error:', error);
                             errorMessage.textContent = error.message.includes('401') ? 'Please log in to add items to cart.' : error.message;
                             errorMessage.style.display = 'block';
+                            setTimeout(() => {
+                                errorMessage.style.display = 'none';
                                 if (error.message.includes('401')) {
                                     window.location.href = '/login.html';
                                 }
+                            }, 3000);
                         });
                 });
 
